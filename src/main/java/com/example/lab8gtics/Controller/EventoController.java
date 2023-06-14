@@ -83,6 +83,44 @@ public class EventoController {
         return ResponseEntity.badRequest().body(responseMap);
     }
 
+    @PutMapping(value = "")
+    public ResponseEntity<HashMap<String, Object>> actualizarEvento(@RequestBody EventoEntity evento) {
+
+        HashMap<String, Object> responseMap = new HashMap<>();
+
+        if (evento.getId() != null && evento.getId() > 0) {
+            //si su id no es nulo y mayor a cero , entonces existe el producto
+            Optional<EventoEntity> opt = eventoRepository.findById(evento.getId());
+            if (opt.isPresent()) {
+                EventoEntity evento1 = opt.get();
+                //validamos campo por campo si es diferente de nulo , se actualiza el campo
+                if (evento1.getNombre() != null && evento1.getFecha() != null) {
+                    evento1.setNombre(evento.getNombre());
+                    evento1.setFecha(evento.getFecha());
+
+                    if ( evento1.getDescripcion() != null)
+                        evento1.setDescripcion(evento.getDescripcion());
+
+
+
+                    eventoRepository.save(evento1);
+                    responseMap.put("estado", "actualizado");
+                    return ResponseEntity.ok(responseMap);
+                }else{
+                    responseMap.put("msg", "el nombre y fecha no pueden ser nulos");
+                    responseMap.put("estado", "error");
+                }
+            } else {
+                responseMap.put("msg", "El evento a actualizar no existe");
+                responseMap.put("estado", "error");
+            }
+        } else {
+            responseMap.put("msg", "Debe enviar id del evento a actualizar");
+            responseMap.put("estado", "error");
+        }
+        return ResponseEntity.badRequest().body(responseMap);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<HashMap<String, Object>> gestionExcepcion(
             HttpServletRequest request) {
